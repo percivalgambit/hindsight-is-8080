@@ -1,5 +1,3 @@
 obj/
-simpleEMU
-simpleEMU-debug
-simpleASM
-simpleASM-debug
+emulator
+emulator-debug

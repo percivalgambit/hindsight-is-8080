@@ -1,9 +1,16 @@
 SHELL := /bin/bash
 CXX := g++
-CXXFLAGS := -std=gnu++17 -pedantic-errors -Wall -Wextra -Werror -march=native -MMD -MP -Isrc/
+CC := gcc
+COMMON_FLAGS := -pedantic-errors -Wall -Wextra -Werror -march=native -MMD -MP -Isrc/
+CXXFLAGS := -std=gnu++17 $(COMMON_FLAGS)
+CFLAGS := -std=gnu11 $(COMMON_FLAGS)
 
 RELEASE_CPPFLAGS := -DNDEBUG
-RELEASE_CXXFLAGS := -O3
+RELEASE_CFLAGS := -O3 -flto
+RELEASE_CXXFLAGS := $(RELEASE_CFLAGS)
+RELEASE_LDFLAGS := -flto
 
 DEBUG_CPPFLAGS := -DDEBUG
-DEBUG_CXXFLAGS := -O0 -g
+DEBUG_CFLAGS := -O0 -g
+DEBUG_CXXFLAGS := $(RELEASE_CFLAGS)
+DEBUG_LDFLAGS := 

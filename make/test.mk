@@ -8,17 +8,34 @@ $$(_test_marker): $(1).$(2)
 	@touch $$@
 endef
 
-define unit_test =
+define cc_unit_test =
 _test_name := obj/test/unit_test/bin/$(1)
 
 $$(eval $$(call test,$(1),unit_test))
 
 $(1).unit_test: $$(_test_name)
-$$(_test_name): obj/debug/test_util/catch_main.o $(call debug_objects,$(2))
+$$(_test_name): obj/debug/test_util/catch_main.o $$(call debug_objects,$(2))
 	@mkdir -p $$(@D)
-	$(CXX) $(LDFLAGS) $$^ -o $$@ $(LOADLIBES) $(LDLIBS)
+	$$(CXX) $$(LDFLAGS) $$^ -o $$@ $$(LOADLIBES) $$(LDLIBS)
 ifdef DEBUG_CMD
-	$(DEBUG_CMD) ./$$@
+	$$(DEBUG_CMD) ./$$@
+	@false
+else
+	./$$@
+endif
+endef
+
+define c_unit_test =
+_test_name := obj/test/unit_test/bin/$(1)
+
+$$(eval $$(call test,$(1),unit_test))
+
+$(1).unit_test: $$(_test_name)
+$$(_test_name): $$(call debug_objects,$(2))
+	@mkdir -p $$(@D)
+	$$(CC) $$(LDFLAGS) $$^ -o $$@ $$(LOADLIBES) $$(LDLIBS)
+ifdef DEBUG_CMD
+	$$(DEBUG_CMD) ./$$@
 	@false
 else
 	./$$@
@@ -39,9 +56,9 @@ $(1).integration_test: REFERENCE_FILES ?=
 $(1).integration_test: $$$$(SUT) $$$$(INPUT_PROG)
 	@mkdir -p $$(dir $$(ACTUAL_STDOUT))
 	@mkdir -p $$(dir $$(ACTUAL_STDERR))
-	@mkdir -p $(INTEGRATION_REFERENCE_DIR)
-	-cp $$(REFERENCE_FILES) $(INTEGRATION_REFERENCE_DIR)
-	$$(if $$(SHOULD_FAIL),-) $(DEBUG_CMD) ./$$< $$(INPUT_PROG) > $$(ACTUAL_STDOUT) 2> $$(ACTUAL_STDERR)
+	@mkdir -p $$(INTEGRATION_REFERENCE_DIR)
+	-cp $$(REFERENCE_FILES) $$(INTEGRATION_REFERENCE_DIR)
+	$$(if $$(SHOULD_FAIL),-) $$(DEBUG_CMD) ./$$< $$(INPUT_PROG) > $$(ACTUAL_STDOUT) 2> $$(ACTUAL_STDERR)
 	diff $$(ACTUAL_STDOUT) $$(EXPECTED_STDOUT)
 	diff $$(ACTUAL_STDERR) $$(EXPECTED_STDERR)
 endef
