@@ -15,40 +15,40 @@ OPCODE_DEFS
 #undef TABLE_ITEM
 static const OpcodeDefinition INVALID_DEFINITION = {Opcode_INVALID, 1};
 
-#define NULLARY_OP(opcode_)                                      \
-  {                                                              \
-    .opcode = opcode_##_DEFINITION.opcode,                       \
-    .instruction_size = opcode_##_DEFINITION.instruction_size,   \
-    .type = OpcodeType_NULLARY, .num_operands = 0, .operands = { \
-      {-1},                                                      \
-    }                                                            \
-  }
-#define ONE_REGISTER_OP(opcode_, reg)                                 \
+#define NULLARY_OP(opcode_)                                           \
   {                                                                   \
     .opcode = opcode_##_DEFINITION.opcode,                            \
     .instruction_size = opcode_##_DEFINITION.instruction_size,        \
-    .type = OpcodeType_ONE_REGISTER, .num_operands = 1, .operands = { \
-      {InstructionRegisterOperand_##reg},                             \
-      {-1},                                                           \
+    .type = InstructionType_NULLARY, .num_operands = 0, .operands = { \
+      {InstructionRegisterOperand_INVALID},                           \
     }                                                                 \
   }
-#define TWO_REGISTER_OP(opcode_, reg1, reg2)                          \
-  {                                                                   \
-    .opcode = opcode_##_DEFINITION.opcode,                            \
-    .instruction_size = opcode_##_DEFINITION.instruction_size,        \
-    .type = OpcodeType_TWO_REGISTER, .num_operands = 2, .operands = { \
-      {InstructionRegisterOperand_##reg1},                            \
-      {InstructionRegisterOperand_##reg2},                            \
-    }                                                                 \
+#define ONE_REGISTER_OP(opcode_, reg)                                      \
+  {                                                                        \
+    .opcode = opcode_##_DEFINITION.opcode,                                 \
+    .instruction_size = opcode_##_DEFINITION.instruction_size,             \
+    .type = InstructionType_ONE_REGISTER, .num_operands = 1, .operands = { \
+      {InstructionRegisterOperand_##reg},                                  \
+      {InstructionRegisterOperand_INVALID},                                \
+    }                                                                      \
   }
-#define REGISTER_PAIR_OP(opcode_, reg_pair)                            \
-  {                                                                    \
-    .opcode = opcode_##_DEFINITION.opcode,                             \
-    .instruction_size = opcode_##_DEFINITION.instruction_size,         \
-    .type = OpcodeType_REGISTER_PAIR, .num_operands = 1, .operands = { \
-      {InstructionRegisterPairOperand_##reg_pair},                     \
-      {-1},                                                            \
-    }                                                                  \
+#define TWO_REGISTER_OP(opcode_, reg1, reg2)                               \
+  {                                                                        \
+    .opcode = opcode_##_DEFINITION.opcode,                                 \
+    .instruction_size = opcode_##_DEFINITION.instruction_size,             \
+    .type = InstructionType_TWO_REGISTER, .num_operands = 2, .operands = { \
+      {InstructionRegisterOperand_##reg1},                                 \
+      {InstructionRegisterOperand_##reg2},                                 \
+    }                                                                      \
+  }
+#define REGISTER_PAIR_OP(opcode_, reg_pair)                                 \
+  {                                                                         \
+    .opcode = opcode_##_DEFINITION.opcode,                                  \
+    .instruction_size = opcode_##_DEFINITION.instruction_size,              \
+    .type = InstructionType_REGISTER_PAIR, .num_operands = 1, .operands = { \
+      {InstructionRegisterPairOperand_##reg_pair},                          \
+      {InstructionRegisterPairOperand_INVALID},                             \
+    }                                                                       \
   }
 
 const OpcodeTableEntry kOpcodeTable[256] = {

@@ -9,17 +9,10 @@ typedef union {
   InstructionRegisterPairOperand reg_pair;
 } InstructionOperand;
 
-typedef enum {
-  OpcodeType_NULLARY,
-  OpcodeType_ONE_REGISTER,
-  OpcodeType_TWO_REGISTER,
-  OpcodeType_REGISTER_PAIR,
-} OpcodeType;
-
 typedef struct {
   const Opcode opcode;
   const unsigned instruction_size;
-  const OpcodeType type;
+  const InstructionType type;
   const unsigned num_operands;
   const InstructionOperand operands[2];
 } OpcodeTableEntry;

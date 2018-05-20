@@ -14,13 +14,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-struct EmulatorImpl {
+struct Emulator {
   Register registers[8];
   Word program_counter;
   Word stack_pointer;
   Memory memory;
   // TODO: implement io devices
-  struct IoDevice *io_devices[UINT8_MAX];
+  struct IoDevice *io_devices[kNumIoDevices];
   bool halt;
 };
 
@@ -57,18 +57,51 @@ void emulatorRun(Emulator *emulator) {
   while (!emulator->halt) {
     const Byte opcode = emulator->memory[emulator->program_counter];
     const OpcodeTableEntry *entry = &kOpcodeTable[opcode];
-    if (emulator->program_counter + entry->instruction_size >=
-        sizeof(emulator->memory)) {
+    if (emulator->program_counter + entry->instruction_size >= kMemorySize) {
       ERROR(
           "Attempting to read instruction of size %u, overrunning memory "
           "bounds of %d to address %" PRIu16,
           entry->instruction_size, kMemorySize,
           emulator->program_counter + entry->instruction_size);
     }
-    const Instruction instruction = newInstruction(
-        entry->opcode, entry->instruction_size, emulator->memory);
     emulator->program_counter++;
-    instructionExecute(instruction, emulator);
+    switch (entry->type) {
+      case InstructionType_NULLARY: {
+        assert(entry->num_operands == 0);
+        NullaryInstruction instruction =
+            newNullaryInstruction(entry->opcode, entry->instruction_size,
+                                  &emulator->memory[emulator->program_counter]);
+        instructionExecute((Instruction *)&instruction, emulator);
+        break;
+      }
+      case InstructionType_ONE_REGISTER: {
+        assert(entry->num_operands == 1);
+        OneRegisterInstruction instruction = newOneRegisterInstruction(
+            entry->opcode, entry->instruction_size,
+            &emulator->memory[emulator->program_counter],
+            entry->operands[0].reg);
+        instructionExecute((Instruction *)&instruction, emulator);
+        break;
+      }
+      case InstructionType_TWO_REGISTER: {
+        assert(entry->num_operands == 2);
+        TwoRegisterInstruction instruction = newTwoRegisterInstruction(
+            entry->opcode, entry->instruction_size,
+            &emulator->memory[emulator->program_counter],
+            entry->operands[0].reg, entry->operands[1].reg);
+        instructionExecute((Instruction *)&instruction, emulator);
+        break;
+      }
+      case InstructionType_REGISTER_PAIR: {
+        assert(entry->num_operands == 1);
+        RegisterPairInstruction instruction = newRegisterPairInstruction(
+            entry->opcode, entry->instruction_size,
+            &emulator->memory[emulator->program_counter],
+            entry->operands[0].reg_pair);
+        instructionExecute((Instruction *)&instruction, emulator);
+        break;
+      }
+    }
   }
 }
 

@@ -3,9 +3,12 @@
 
 #include "emulator/flags.h"
 
+#include <stdint.h>
 #include <stdio.h>
 
-typedef struct EmulatorImpl Emulator;
+typedef struct Emulator Emulator;
+
+#define kNumIoDevices (UINT8_MAX + 1)
 
 typedef enum {
   RegisterIndex_B = 0,
