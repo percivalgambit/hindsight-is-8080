@@ -5,9 +5,9 @@
 #include "emulator/emulator.h"
 #include "util/logging.h"
 
-static void cleanup();
+static void cleanup(void);
 
-static const CmdLine *cmd_line = NULL;
+static CmdLine *cmd_line = NULL;
 static Emulator *emulator = NULL;
 
 int main(const int argc, const char *argv[]) {
@@ -26,7 +26,7 @@ int main(const int argc, const char *argv[]) {
   return EXIT_SUCCESS;
 }
 
-static void cleanup() {
+static void cleanup(void) {
   if (cmd_line != NULL) {
     deleteCmdLine(cmd_line);
   }

@@ -13,13 +13,13 @@ CmdLine *parseCmdLine(const int argc, const char *argv[]) {
     ERROR("Expected 2 arguments, got %d", argc);
   }
 
-  CmdLine *cmd_line = malloc(sizeof(CmdLine));
+  CmdLine *cmd_line = calloc(1, sizeof(CmdLine));
   *cmd_line = (CmdLine){.program_file = argv[1]};
   return cmd_line;
 }
 
-void deleteCmdLine(const CmdLine *cmd_line) {
+void deleteCmdLine(CmdLine *cmd_line) {
   assert(cmd_line != NULL);
 
-  free((void *)cmd_line);
+  free(cmd_line);
 }

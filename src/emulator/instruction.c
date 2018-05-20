@@ -2,23 +2,23 @@
 
 #include <assert.h>
 #include <inttypes.h>
-#include <stdint.h>
-#include <stdlib.h>
 
 #include "emulator/emulator.h"
 #include "emulator/opcode.h"
+#include "emulator/opcode_defs.h"
+#include "emulator/types.h"
 #include "util/logging.h"
 
 #define TABLE_ITEM(opcode, _)                                 \
   static void Execute_##opcode(const Instruction instruction, \
                                Emulator *emulator);
-#include "emulator/opcode_defs.h"
+OPCODE_DEFS
 #undef TABLE_ITEM
 static void Execute_INVALID(const Instruction instruction, Emulator *emulator)
     __attribute__((noreturn));
 
 Instruction newInstruction(const Opcode opcode, const unsigned instruction_size,
-                           const uint8_t *memory) {
+                           const Byte *memory) {
   assert(instruction_size > 0);
   assert(memory != NULL);
 
@@ -33,7 +33,7 @@ void instructionExecute(const Instruction instruction, Emulator *emulator) {
   case Opcode_##opcode:                      \
     Execute_##opcode(instruction, emulator); \
     break;
-#include "emulator/opcode_defs.h"
+    OPCODE_DEFS
 #undef TABLE_ITEM
     case Opcode_INVALID:
       Execute_INVALID(instruction, emulator);
@@ -43,30 +43,11 @@ void instructionExecute(const Instruction instruction, Emulator *emulator) {
   }
 }
 
-static bool getParity(const int8_t byte) {
-  int8_t parity = byte;
-  parity ^= parity >> 4;
-  parity ^= parity >> 2;
-  parity ^= parity >> 1;
-  return (~parity) & 1;
-}
+static void Execute_MOV(const Instruction instruction __attribute__((unused)),
+                        Emulator *emulator __attribute__((unused))) {}
 
-static void Execute_MOV(const Instruction instruction, Emulator *emulator) {
-  const uint8_t src_mask = *instruction.data & 0x7;
-  const uint8_t dst_mask = (*instruction.data >> 3) & 0x7;
-  const int8_t src = *getByteForInstructionMask(src_mask, emulator);
-  int8_t *dst = getByteForInstructionMask(dst_mask, emulator);
-  *dst = src;
-}
-
-static void Execute_LDAX(const Instruction instruction, Emulator *emulator) {
-  const Register reg =
-      (*instruction.data >> 4) & 0x01 ? Register_D : Register_B;
-  const uint16_t memory_location = *getRegisterPair(reg, emulator);
-  const int8_t src = *getRandomAccessMemoryByte(memory_location, emulator);
-  int8_t *acc = getRegister(Register_ACCUMULATOR, emulator);
-  *acc = src;
-}
+static void Execute_LDAX(const Instruction instruction __attribute__((unused)),
+                         Emulator *emulator __attribute__((unused))) {}
 
 static void Execute_LDA(const Instruction instruction __attribute__((unused)),
                         Emulator *emulator __attribute__((unused))) {}
@@ -74,14 +55,8 @@ static void Execute_LDA(const Instruction instruction __attribute__((unused)),
 static void Execute_MVI(const Instruction instruction __attribute__((unused)),
                         Emulator *emulator __attribute__((unused))) {}
 
-static void Execute_STAX(const Instruction instruction, Emulator *emulator) {
-  const Register reg =
-      (*instruction.data >> 4) & 0x01 ? Register_D : Register_B;
-  const uint16_t memory_location = *getRegisterPair(reg, emulator);
-  const int8_t acc_value = *getRegister(Register_ACCUMULATOR, emulator);
-  int8_t *dst = getRandomAccessMemoryByte(memory_location, emulator);
-  *dst = acc_value;
-}
+static void Execute_STAX(const Instruction instruction __attribute__((unused)),
+                         Emulator *emulator __attribute__((unused))) {}
 
 static void Execute_STA(const Instruction instruction __attribute__((unused)),
                         Emulator *emulator __attribute__((unused))) {}
@@ -143,29 +118,11 @@ static void Execute_NOP(const Instruction instruction __attribute__((unused)),
 static void Execute_HLT(const Instruction instruction __attribute__((unused)),
                         Emulator *emulator __attribute__((unused))) {}
 
-static void Execute_INR(const Instruction instruction, Emulator *emulator) {
-  const uint8_t mask = (*instruction.data >> 3) & 0x7;
-  int8_t *byte = getByteForInstructionMask(mask, emulator);
-  (*byte)++;
+static void Execute_INR(const Instruction instruction __attribute__((unused)),
+                        Emulator *emulator __attribute__((unused))) {}
 
-  setFlag(*byte == 0, FlagPosition_ZERO, emulator);
-  setFlag(*byte < 0, FlagPosition_SIGN, emulator);
-  setFlag(getParity(*byte), FlagPosition_PARITY, emulator);
-  const bool auxiliary_carry = !(*byte & 0xF);
-  setFlag(auxiliary_carry, FlagPosition_AUXILIARY_CARRY, emulator);
-}
-
-static void Execute_DCR(const Instruction instruction, Emulator *emulator) {
-  const uint8_t mask = (*instruction.data >> 3) & 0x7;
-  int8_t *byte = getByteForInstructionMask(mask, emulator);
-  (*byte)--;
-
-  setFlag(*byte == 0, FlagPosition_ZERO, emulator);
-  setFlag(*byte < 0, FlagPosition_SIGN, emulator);
-  setFlag(getParity(*byte), FlagPosition_PARITY, emulator);
-  const bool auxiliary_carry = *byte & 0x0F;
-  setFlag(auxiliary_carry, FlagPosition_AUXILIARY_CARRY, emulator);
-}
+static void Execute_DCR(const Instruction instruction __attribute__((unused)),
+                        Emulator *emulator __attribute__((unused))) {}
 
 static void Execute_INX(const Instruction instruction __attribute__((unused)),
                         Emulator *emulator __attribute__((unused))) {}
@@ -174,39 +131,16 @@ static void Execute_DCX(const Instruction instruction __attribute__((unused)),
                         Emulator *emulator __attribute__((unused))) {}
 
 static void Execute_DAA(const Instruction instruction __attribute__((unused)),
-                        Emulator *emulator) {
-  int8_t *accumulator = getRegister(Register_ACCUMULATOR, emulator);
-  const int8_t lower_nibble = *accumulator & 0x0F;
-  if (lower_nibble > 9 || getFlag(FlagPosition_AUXILIARY_CARRY, emulator)) {
-    setFlag((lower_nibble + 0x06) | 0x10, FlagPosition_AUXILIARY_CARRY,
-            emulator);
-    *accumulator += 0x06;
-  }
-  const int8_t upper_nibble = (*accumulator >> 4) & 0x0F;
-  if (upper_nibble > 9 || getFlag(FlagPosition_CARRY, emulator)) {
-    setFlag((upper_nibble + 0x06) | 0x10, FlagPosition_CARRY, emulator);
-    *accumulator += 0x60;
-  }
-  setFlag(*accumulator == 0, FlagPosition_ZERO, emulator);
-  setFlag(*accumulator < 0, FlagPosition_SIGN, emulator);
-  setFlag(getParity(*accumulator), FlagPosition_PARITY, emulator);
-}
+                        Emulator *emulator __attribute__((unused))) {}
 
 static void Execute_CMA(const Instruction instruction __attribute__((unused)),
-                        Emulator *emulator) {
-  int8_t *accumulator = getRegister(Register_ACCUMULATOR, emulator);
-  *accumulator = ~(*accumulator);
-}
+                        Emulator *emulator __attribute__((unused))) {}
 
 static void Execute_STC(const Instruction instruction __attribute__((unused)),
-                        Emulator *emulator) {
-  setFlag(true, FlagPosition_CARRY, emulator);
-}
+                        Emulator *emulator __attribute__((unused))) {}
 
 static void Execute_CMC(const Instruction instruction __attribute__((unused)),
-                        Emulator *emulator) {
-  complementFlag(FlagPosition_CARRY, emulator);
-}
+                        Emulator *emulator __attribute__((unused))) {}
 
 static void Execute_RLC(const Instruction instruction __attribute__((unused)),
                         Emulator *emulator __attribute__((unused))) {}
@@ -345,5 +279,5 @@ static void Execute_OUT(const Instruction instruction __attribute__((unused)),
 
 static void Execute_INVALID(const Instruction instruction, Emulator *emulator) {
   ERROR("Invalid instruction %" PRIu8 "encountered at position %" PRIi16,
-        *instruction.data, getProgramCounter(emulator));
+        *instruction.data, emulatorProgramCounter(emulator));
 }

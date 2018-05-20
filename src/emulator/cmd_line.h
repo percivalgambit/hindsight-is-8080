@@ -6,6 +6,6 @@ typedef struct {
 } CmdLine;
 
 CmdLine *parseCmdLine(const int argc, const char *argv[]);
-void deleteCmdLine(const CmdLine *cmd_line);
+void deleteCmdLine(CmdLine *cmd_line);
 
 #endif  // EMULATOR_CMD_LINE_H_

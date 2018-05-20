@@ -2,22 +2,25 @@
 
 #include "emulator/instruction.h"
 #include "emulator/io_device.h"
+#include "emulator/memory.h"
 #include "emulator/opcode_table.h"
+#include "emulator/register.h"
+#include "emulator/types.h"
 #include "util/logging.h"
 
 #include <assert.h>
+#include <inttypes.h>
 #include <stdbool.h>
-#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 
 struct EmulatorImpl {
-  uint8_t registers[8];
-  uint16_t program_counter;
-  uint16_t stack_pointer;
-  uint8_t memory[INT16_MAX];
+  Register registers[8];
+  Word program_counter;
+  Word stack_pointer;
+  Memory memory;
   // TODO: implement io devices
-  struct IoDevice *io_devices[INT8_MAX];
+  struct IoDevice *io_devices[UINT8_MAX];
   bool halt;
 };
 
@@ -25,15 +28,10 @@ Emulator *newEmulator(FILE *program) {
   assert(program != NULL);
   assert(!ferror(program));
 
-  static const uint8_t initFlags = 0x02;
+  static const Register initFlags = 0x02;
 
-  Emulator *emulator = malloc(sizeof(Emulator));
-  *emulator = (Emulator){.registers = {0},
-                         .program_counter = 0,
-                         .stack_pointer = 0,
-                         .io_devices = {0},
-                         .halt = false};
-  emulator->registers[Register_FLAGS] = initFlags;
+  Emulator *emulator = calloc(1, sizeof(Emulator));
+  emulator->registers[RegisterIndex_FLAGS] = initFlags;
 
   fread(emulator->memory, sizeof(emulator->memory), 1, program);
   if (ferror(program)) {
@@ -47,24 +45,24 @@ Emulator *newEmulator(FILE *program) {
   return emulator;
 }
 
-void deleteEmulator(const Emulator *emulator) {
+void deleteEmulator(Emulator *emulator) {
   assert(emulator != NULL);
 
-  free((void *)emulator);
+  free(emulator);
 }
 
 void emulatorRun(Emulator *emulator) {
   assert(emulator != NULL);
 
   while (!emulator->halt) {
-    const uint8_t opcode = emulator->memory[emulator->program_counter];
-    const OpcodeTableEntry *entry = kOpcodeTable[opcode];
+    const Byte opcode = emulator->memory[emulator->program_counter];
+    const OpcodeTableEntry *entry = &kOpcodeTable[opcode];
     if (emulator->program_counter + entry->instruction_size >=
         sizeof(emulator->memory)) {
       ERROR(
           "Attempting to read instruction of size %u, overrunning memory "
-          "bounds of %lu to address %u",
-          entry->instruction_size, sizeof(emulator->memory),
+          "bounds of %d to address %" PRIu16,
+          entry->instruction_size, kMemorySize,
           emulator->program_counter + entry->instruction_size);
     }
     const Instruction instruction = newInstruction(
@@ -74,65 +72,10 @@ void emulatorRun(Emulator *emulator) {
   }
 }
 
-void setFlag(const bool value, const FlagPosition position,
-             Emulator *emulator) {
-  if (value) {
-    emulator->registers[Register_FLAGS] |= (1 << position);
-  } else {
-    emulator->registers[Register_FLAGS] &= ~(1 << position);
-  }
+Flags *emulatorFlags(Emulator *emulator) {
+  return &emulator->registers[RegisterIndex_FLAGS];
 }
 
-bool getFlag(const FlagPosition position, const Emulator *emulator) {
-  return emulator->registers[Register_FLAGS] & (1 << position);
-}
-
-void complementFlag(const FlagPosition position, Emulator *emulator) {
-  emulator->registers[Register_FLAGS] ^= (1 << position);
-}
-
-int8_t *getRegister(const Register reg, Emulator *emulator) {
-  return (int8_t *)&emulator->registers[reg];
-}
-
-uint16_t *getRegisterPair(const Register reg, Emulator *emulator) {
-  return (uint16_t *)&emulator->registers[reg];
-}
-
-int8_t *getRandomAccessMemoryByte(const uint16_t memory_location,
-                                  Emulator *emulator) {
-  return (int8_t *)&emulator->memory[memory_location];
-}
-
-int8_t *getMemoryByte(Emulator *emulator) {
-  return getRandomAccessMemoryByte(*getRegisterPair(Register_H, emulator),
-                                   emulator);
-}
-
-int8_t *getByteForInstructionMask(const InstructionMask mask,
-                                  Emulator *emulator) {
-  switch (mask) {
-    case InstructionMask_B:
-      return getRegister(Register_B, emulator);
-    case InstructionMask_C:
-      return getRegister(Register_C, emulator);
-    case InstructionMask_D:
-      return getRegister(Register_D, emulator);
-    case InstructionMask_E:
-      return getRegister(Register_E, emulator);
-    case InstructionMask_H:
-      return getRegister(Register_H, emulator);
-    case InstructionMask_L:
-      return getRegister(Register_L, emulator);
-    case InstructionMask_MEM:
-      return getMemoryByte(emulator);
-    case InstructionMask_ACC:
-      return getRegister(Register_ACCUMULATOR, emulator);
-    default:
-      ERROR("This is impossible");
-  }
-}
-
-uint16_t getProgramCounter(const Emulator *emulator) {
+Word emulatorProgramCounter(Emulator *emulator) {
   return emulator->program_counter;
 }
