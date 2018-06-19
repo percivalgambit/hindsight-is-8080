@@ -1,6 +1,5 @@
 include make/*.mk
 
-EMULATOR_SRC := src/emulator/main.c src/emulator/emulator.c src/emulator/cmd_line.c src/emulator/instruction.c src/emulator/opcode_table.c src/emulator/flags.c
+EMULATOR_SRC := $(shell find src/ -type f -name "*.c")
 
 $(eval $(call c_binary,emulator,$(EMULATOR_SRC)))
-$(eval $(call c_debug_binary,emulator-debug,$(EMULATOR_SRC)))

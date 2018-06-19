@@ -1,57 +1,44 @@
-#include "emulator/opcode_table.h"
+#include "emulator/instructions/instruction_header.h"
 
-#include "emulator/opcode.h"
-#include "emulator/opcode_defs.h"
+#include <stdint.h>
+
+#include "emulator/instructions/instruction.h"
+#include "emulator/instructions/opcode.h"
+#include "emulator/instructions/opcode_defs.h"
+#include "util/logging.h"
 
 typedef struct {
-  const Opcode opcode;
-  const unsigned instruction_size;
-} OpcodeDefinition;
+  Opcode opcode;
+  OperandEntry operand_entry;
+} InstructionHeaderEntry;
 
-#define TABLE_ITEM(opcode_, instruction_size_)           \
-  static const OpcodeDefinition opcode_##_DEFINITION = { \
-      .opcode = Opcode_##opcode_, .instruction_size = instruction_size_};
-OPCODE_DEFS
-#undef TABLE_ITEM
-static const OpcodeDefinition INVALID_DEFINITION = {Opcode_INVALID, 1};
-
-#define NULLARY_OP(opcode_)                                           \
-  {                                                                   \
-    .opcode = opcode_##_DEFINITION.opcode,                            \
-    .instruction_size = opcode_##_DEFINITION.instruction_size,        \
-    .type = InstructionType_NULLARY, .num_operands = 0, .operands = { \
-      {InstructionRegisterOperand_INVALID},                           \
-    }                                                                 \
+#define NULLARY_OP(opcode_)                                      \
+  {                                                              \
+    .opcode = Opcode_##opcode_, .operand_entry.num_operands = 0, \
+    .operand_entry.instruction_type = InstructionType_NULLARY    \
   }
-#define ONE_REGISTER_OP(opcode_, reg)                                      \
-  {                                                                        \
-    .opcode = opcode_##_DEFINITION.opcode,                                 \
-    .instruction_size = opcode_##_DEFINITION.instruction_size,             \
-    .type = InstructionType_ONE_REGISTER, .num_operands = 1, .operands = { \
-      {InstructionRegisterOperand_##reg},                                  \
-      {InstructionRegisterOperand_INVALID},                                \
-    }                                                                      \
+#define ONE_REGISTER_OP(opcode_, reg_index_)                           \
+  {                                                                    \
+    .opcode = Opcode_##opcode_, .operand_entry.num_operands = 1,       \
+    .operand_entry.operands[0].reg_index = RegisterIndex_##reg_index_, \
+    .operand_entry.instruction_type = InstructionType_ONE_REGISTER     \
   }
-#define TWO_REGISTER_OP(opcode_, reg1, reg2)                               \
-  {                                                                        \
-    .opcode = opcode_##_DEFINITION.opcode,                                 \
-    .instruction_size = opcode_##_DEFINITION.instruction_size,             \
-    .type = InstructionType_TWO_REGISTER, .num_operands = 2, .operands = { \
-      {InstructionRegisterOperand_##reg1},                                 \
-      {InstructionRegisterOperand_##reg2},                                 \
-    }                                                                      \
+#define TWO_REGISTER_OP(opcode_, reg_index1, reg_index2)               \
+  {                                                                    \
+    .opcode = Opcode_##opcode_, .operand_entry.num_operands = 2,       \
+    .operand_entry.operands[0].reg_index = RegisterIndex_##reg_index1, \
+    .operand_entry.operands[1].reg_index = RegisterIndex_##reg_index2, \
+    .operand_entry.instruction_type = InstructionType_TWO_REGISTER     \
   }
-#define REGISTER_PAIR_OP(opcode_, reg_pair)                                 \
-  {                                                                         \
-    .opcode = opcode_##_DEFINITION.opcode,                                  \
-    .instruction_size = opcode_##_DEFINITION.instruction_size,              \
-    .type = InstructionType_REGISTER_PAIR, .num_operands = 1, .operands = { \
-      {InstructionRegisterPairOperand_##reg_pair},                          \
-      {InstructionRegisterPairOperand_INVALID},                             \
-    }                                                                       \
+#define REGISTER_PAIR_OP(opcode_, reg_pair_index_)                  \
+  {                                                                 \
+    .opcode = Opcode_##opcode_, .operand_entry.num_operands = 1,    \
+    .operand_entry.operands[0].reg_pair_index =                     \
+        RegisterPairIndex_##reg_pair_index_,                        \
+    .operand_entry.instruction_type = InstructionType_REGISTER_PAIR \
   }
 
-const OpcodeTableEntry kOpcodeTable[256] = {
+static const InstructionHeaderEntry kInstructionHeaderTable[UINT8_MAX + 1] = {
     [0x00] = NULLARY_OP(NOP),
     [0x01] = REGISTER_PAIR_OP(LXI, B),
     [0x02] = REGISTER_PAIR_OP(STAX, B),
@@ -309,3 +296,58 @@ const OpcodeTableEntry kOpcodeTable[256] = {
     [0xFE] = NULLARY_OP(CPI),
     [0xFF] = NULLARY_OP(RST),
 };
+
+Opcode instructionHeaderOpcode(const uint8_t instruction_header) {
+  const InstructionHeaderEntry entry =
+      kInstructionHeaderTable[instruction_header];
+  return entry.opcode;
+}
+
+unsigned instructionHeaderSize(const uint8_t instruction_header) {
+  const Opcode opcode = instructionHeaderOpcode(instruction_header);
+  switch (opcode) {
+#define TABLE_ITEM(opcode, instruction_size) \
+  case Opcode_##opcode:                      \
+    return instruction_size;
+    OPCODE_DEFS
+#undef TABLE_ITEM
+    default:
+      ERROR("Unknown opcode %u", opcode);
+  }
+}
+
+InstructionType instructionHeaderType(const uint8_t instruction_header) {
+  const Opcode opcode = instructionHeaderOpcode(instruction_header);
+  switch (opcode) {
+#define TABLE_ITEM(opcode, ...) \
+  case Opcode_##opcode:         \
+    return InstructionType_NULLARY;
+    NULLARY_OPCODE_DEFS
+#undef TABLE_ITEM
+#define TABLE_ITEM(opcode, ...) \
+  case Opcode_##opcode:         \
+    return InstructionType_ONE_REGISTER;
+    ONE_REGISTER_OPCODE_DEFS
+#undef TABLE_ITEM
+#define TABLE_ITEM(opcode, ...) \
+  case Opcode_##opcode:         \
+    return InstructionType_TWO_REGISTER;
+    TWO_REGISTER_OPCODE_DEFS
+#undef TABLE_ITEM
+#define TABLE_ITEM(opcode, ...) \
+  case Opcode_##opcode:         \
+    return InstructionType_REGISTER_PAIR;
+    REGISTER_PAIR_OPCODE_DEFS
+#undef TABLE_ITEM
+    case Opcode_INVALID:
+      return InstructionType_NULLARY;
+    default:
+      ERROR("Unknown opcode %u", opcode);
+  }
+}
+
+OperandEntry instructionHeaderOperands(const uint8_t instruction_header) {
+  const InstructionHeaderEntry entry =
+      kInstructionHeaderTable[instruction_header];
+  return entry.operand_entry;
+}

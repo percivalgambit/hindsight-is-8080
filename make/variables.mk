@@ -1,24 +1,21 @@
 SHELL := /bin/bash
 CXX := g++
 CC := gcc
-CPPFLAGS :=
-COMMON_FLAGS := \
-  -pedantic -Wall -Wextra \
-  -march=native -pipe \
-  -MMD -MP -Isrc/
-CXXFLAGS := -std=c++17 $(COMMON_FLAGS) -fdiagnostics-show-template-tree
+COMMON_FLAGS := -pedantic -Wall -Wextra -march=native -pipe -MMD -MP -Isrc/
+CXXFLAGS := -std=c++17 $(COMMON_FLAGS) -fdiagnostics-show-template-tree -fno-exceptions -fno-rtti
 CFLAGS := -std=c17 $(COMMON_FLAGS)
 
-RELEASE_CPPFLAGS := -DNDEBUG
-COMMON_RELEASE_FLAGS := -O3 -flto
-RELEASE_CFLAGS := $(COMMON_RELEASE_FLAGS)
-RELEASE_CXXFLAGS := $(COMMON_RELEASE_FLAGS)
+RELEASE_CFLAGS := -O3 -flto
+RELEASE_CXXFLAGS := $(RELEASE_CFLAGS)
 RELEASE_LDFLAGS := -flto
 
-DEBUG_CPPFLAGS := -DDEBUG
-COMMON_DEBUG_FLAGS := \
-  -Og -ggdb3 \
-  -Werror \
+DEBUG_CFLAGS := -Og -ggdb3 -Werror
+DEBUG_CXXFLAGS := $(DEBUG_CFLAGS)
+
+ASSERTS_CPPFLAGS := -DDEBUG
+NOASSERTS_CPPFLAGS := -DNDEBUG
+
+COMMON_WARNINGS_FLAGS := \
   -Wno-error=suggest-attribute=pure -Wno-error=suggest-attribute=const -Wno-error=suggest-attribute=noreturn -Wno-error=suggest-attribute=format -Wno-error=suggest-attribute=cold -Wno-error=suggest-attribute=malloc \
   -Wunused -Wunused-const-variable=2 -Wunused-macros \
   -Wdouble-promotion -Wfloat-equal \
@@ -38,16 +35,15 @@ COMMON_DEBUG_FLAGS := \
   -Wmissing-declarations \
   -Wpacked \
   -Wtrampolines
-DEBUG_CFLAGS := $(COMMON_DEBUG_FLAGS) \
+WARNINGS_CFLAGS := $(COMMON_WARNINGS_FLAGS) \
   -Wjump-misses-init \
   -Wbad-function-cast \
   -Wstrict-prototypes -Wmissing-prototypes \
   -Wold-style-definition \
   -Wnested-externs
-DEBUG_CXXFLAGS := $(COMMON_DEBUG_FLAGS) \
+WARNINGS_CXXFLAGS := $(COMMON_WARNINGS_FLAGS) \
   -Wold-style-cast -Wuseless-cast \
   -Wsuggest-final-types -Wsuggest-final-methods -Wsuggest-override \
   -Wplacement-new=2 \
   -Wzero-as-null-pointer-constant \
   -Wextra-semi
-DEBUG_LDFLAGS :=

@@ -1,24 +1,21 @@
-#include "emulator.h"
+#include "emulator/emulator.h"
 
-#include "emulator/instruction.h"
+#include "emulator/instructions/instruction.h"
+#include "emulator/instructions/operands.h"
 #include "emulator/io_device.h"
-#include "emulator/memory.h"
-#include "emulator/opcode_table.h"
-#include "emulator/register.h"
-#include "emulator/types.h"
 #include "util/logging.h"
 
 #include <assert.h>
-#include <inttypes.h>
 #include <stdbool.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 
 struct Emulator {
-  Register registers[8];
-  Word program_counter;
-  Word stack_pointer;
-  Memory memory;
+  uint8_t registers[kNumRegisters];
+  uint16_t program_counter;
+  uint16_t stack_pointer;
+  uint8_t memory[kMemorySize];
   // TODO: implement io devices
   struct IoDevice *io_devices[kNumIoDevices];
   bool halt;
@@ -28,7 +25,7 @@ Emulator *newEmulator(FILE *program) {
   assert(program != NULL);
   assert(!ferror(program));
 
-  static const Register initFlags = 0x02;
+  static const uint8_t initFlags = 0x02;
 
   Emulator *emulator = calloc(1, sizeof(Emulator));
   emulator->registers[RegisterIndex_FLAGS] = initFlags;
@@ -55,60 +52,45 @@ void emulatorRun(Emulator *emulator) {
   assert(emulator != NULL);
 
   while (!emulator->halt) {
-    const Byte opcode = emulator->memory[emulator->program_counter];
-    const OpcodeTableEntry *entry = &kOpcodeTable[opcode];
-    if (emulator->program_counter + entry->instruction_size >= kMemorySize) {
-      ERROR(
-          "Attempting to read instruction of size %u, overrunning memory "
-          "bounds of %d to address %" PRIu16,
-          entry->instruction_size, kMemorySize,
-          emulator->program_counter + entry->instruction_size);
-    }
-    emulator->program_counter++;
-    switch (entry->type) {
-      case InstructionType_NULLARY: {
-        assert(entry->num_operands == 0);
-        NullaryInstruction instruction =
-            newNullaryInstruction(entry->opcode, entry->instruction_size,
-                                  &emulator->memory[emulator->program_counter]);
-        instructionExecute((Instruction *)&instruction, emulator);
-        break;
-      }
-      case InstructionType_ONE_REGISTER: {
-        assert(entry->num_operands == 1);
-        OneRegisterInstruction instruction = newOneRegisterInstruction(
-            entry->opcode, entry->instruction_size,
-            &emulator->memory[emulator->program_counter],
-            entry->operands[0].reg);
-        instructionExecute((Instruction *)&instruction, emulator);
-        break;
-      }
-      case InstructionType_TWO_REGISTER: {
-        assert(entry->num_operands == 2);
-        TwoRegisterInstruction instruction = newTwoRegisterInstruction(
-            entry->opcode, entry->instruction_size,
-            &emulator->memory[emulator->program_counter],
-            entry->operands[0].reg, entry->operands[1].reg);
-        instructionExecute((Instruction *)&instruction, emulator);
-        break;
-      }
-      case InstructionType_REGISTER_PAIR: {
-        assert(entry->num_operands == 1);
-        RegisterPairInstruction instruction = newRegisterPairInstruction(
-            entry->opcode, entry->instruction_size,
-            &emulator->memory[emulator->program_counter],
-            entry->operands[0].reg_pair);
-        instructionExecute((Instruction *)&instruction, emulator);
-        break;
-      }
-    }
+    const Instruction *instruction = decodeInstruction(emulator);
+    executeInstruction(emulator, instruction);
+    deleteInstruction(instruction);
   }
 }
 
-Flags *emulatorFlags(Emulator *emulator) {
-  return &emulator->registers[RegisterIndex_FLAGS];
+uint16_t emulatorProgramCounter(const Emulator *emulator) {
+  return emulator->program_counter;
 }
 
-Word emulatorProgramCounter(Emulator *emulator) {
-  return emulator->program_counter;
+uint8_t emulatorGetAndAdvanceProgramCounter(Emulator *emulator) {
+  return emulator->memory[emulator->program_counter++];
+}
+
+void emulatorSetFlag(Emulator *emulator, const bool value,
+                     const FlagIndex index) {
+  assert(emulator != NULL);
+  assert(index >= 0 && index < 8);
+
+  uint8_t *flags = &emulator->registers[RegisterIndex_FLAGS];
+  if (value) {
+    *flags |= (uint8_t)(1 << index);
+  } else {
+    *flags &= (uint8_t)(~(1u << index));
+  }
+}
+
+bool emulatorGetFlag(const Emulator *emulator, const FlagIndex index) {
+  assert(emulator != NULL);
+  assert(index >= 0 && index < 8);
+
+  const uint8_t *flags = &emulator->registers[RegisterIndex_FLAGS];
+  return *flags & (1 << index);
+}
+
+void emulatorComplementFlag(Emulator *emulator, const FlagIndex index) {
+  assert(emulator != NULL);
+  assert(index >= 0 && index < 8);
+
+  uint8_t *flags = &emulator->registers[RegisterIndex_FLAGS];
+  *flags ^= (uint8_t)(1 << index);
 }

@@ -1,3 +1,4 @@
 obj/
 emulator
 emulator-debug
+!src/**

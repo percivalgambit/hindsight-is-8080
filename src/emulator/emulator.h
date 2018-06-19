@@ -1,32 +1,31 @@
 #ifndef EMULATOR_EMULATOR_H_
 #define EMULATOR_EMULATOR_H_
 
-#include "emulator/flags.h"
-
+#include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
 
+#include "emulator/instructions/operands.h"
+
 typedef struct Emulator Emulator;
 
+#define kNumRegisters 8
+#define kMemorySize (UINT16_MAX + 1)
 #define kNumIoDevices (UINT8_MAX + 1)
-
-typedef enum {
-  RegisterIndex_B = 0,
-  RegisterIndex_C = 1,
-  RegisterIndex_D = 2,
-  RegisterIndex_E = 3,
-  RegisterIndex_H = 4,
-  RegisterIndex_L = 5,
-  RegisterIndex_FLAGS = 6,
-  RegisterIndex_ACC = 7,
-} RegisterIndex;
 
 Emulator *newEmulator(FILE *program);
 void deleteEmulator(Emulator *emulator);
 
 void emulatorRun(Emulator *emulator);
 
-Flags *emulatorFlags(Emulator *emulator) __attribute__((const));
-Word emulatorProgramCounter(Emulator *emulator) __attribute__((const));
+uint16_t emulatorProgramCounter(const Emulator *emulator)
+    __attribute__((const));
+uint8_t emulatorGetAndAdvanceProgramCounter(Emulator *emulator);
+
+void emulatorSetFlag(Emulator *emulator, const bool value,
+                     const FlagIndex index);
+bool emulatorGetFlag(const Emulator *emulator, const FlagIndex index)
+    __attribute__((const));
+void emulatorComplementFlag(Emulator *emulator, const FlagIndex index);
 
 #endif  // EMULATOR_EMULATOR_H_
