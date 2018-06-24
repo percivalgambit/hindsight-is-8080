@@ -11,20 +11,20 @@
 static RegisterPairInstruction register_pair_instruction;
 static bool in_use;
 
-RegisterPairInstruction *newRegisterPairInstruction(
+RegisterPairInstruction *_newRegisterPairInstruction(
     const Opcode opcode, const unsigned instruction_size, const uint8_t *data,
     const RegisterPairIndex reg_pair_index) {
   assert(in_use == false);
 
   in_use = true;
-  initInstruction((Instruction *)&register_pair_instruction, opcode,
-                  instruction_size, data, InstructionType_REGISTER_PAIR);
+  _initInstruction((Instruction *)&register_pair_instruction, opcode,
+                   instruction_size, data, InstructionType_REGISTER_PAIR);
   register_pair_instruction.reg_pair_index = reg_pair_index;
   return &register_pair_instruction;
 }
 
-void deleteRegisterPairInstruction(const RegisterPairInstruction *instruction
-                                   __attribute__((unused))) {
+void _deleteRegisterPairInstruction(RegisterPairInstruction *instruction
+                                    __attribute__((unused))) {
   in_use = false;
 }
 

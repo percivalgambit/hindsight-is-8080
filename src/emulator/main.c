@@ -2,13 +2,13 @@
 #include <stdlib.h>
 
 #include "emulator/cmd_line.h"
-#include "emulator/emulator.h"
+#include "emulator/cpu/cpu.h"
 #include "util/logging.h"
 
 static void cleanup(void);
 
 static CmdLine *cmd_line = NULL;
-static Emulator *emulator = NULL;
+static Cpu *cpu = NULL;
 
 int main(const int argc, const char *argv[]) {
   if (atexit(cleanup)) {
@@ -20,8 +20,8 @@ int main(const int argc, const char *argv[]) {
   if (program == NULL) {
     ERROR("Could not open %s", cmd_line->program_file);
   }
-  emulator = newEmulator(program);
-  emulatorRun(emulator);
+  cpu = newCpu(program);
+  cpuRun(cpu);
 
   return EXIT_SUCCESS;
 }
@@ -30,7 +30,7 @@ static void cleanup(void) {
   if (cmd_line != NULL) {
     deleteCmdLine(cmd_line);
   }
-  if (emulator != NULL) {
-    deleteEmulator(emulator);
+  if (cpu != NULL) {
+    deleteCpu(cpu);
   }
 }

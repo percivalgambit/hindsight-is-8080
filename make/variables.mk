@@ -29,7 +29,7 @@ COMMON_WARNINGS_FLAGS := \
   -Wsuggest-attribute=pure -Wsuggest-attribute=const -Wsuggest-attribute=noreturn -Wsuggest-attribute=format -Wsuggest-attribute=cold -Wsuggest-attribute=malloc \
   -Walloc-zero \
   -Warray-bounds=2 \
-  -Wcast-align=strict -Wcast-qual -Wconversion \
+  -Wcast-align=strict -Wconversion \
   -Wshadow -Wredundant-decls -Wduplicated-cond -Wduplicated-branches -Wlogical-op \
   -Wunsafe-loop-optimizations \
   -Wmissing-declarations \

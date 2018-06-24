@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-#include "emulator/emulator.h"
+#include "emulator/cpu/cpu.h"
 #include "emulator/instructions/instruction.h"
 #include "emulator/instructions/opcode.h"
 #include "emulator/instructions/opcode_defs.h"
@@ -14,17 +14,16 @@ typedef struct {
   RegisterPairIndex reg_pair_index;
 } RegisterPairInstruction;
 
-RegisterPairInstruction *newRegisterPairInstruction(
+RegisterPairInstruction *_newRegisterPairInstruction(
     const Opcode opcode, const unsigned instruction_size, const uint8_t *data,
     const RegisterPairIndex reg_pair_index);
-void deleteRegisterPairInstruction(const RegisterPairInstruction *instruction);
+void _deleteRegisterPairInstruction(RegisterPairInstruction *instruction);
 
 const RegisterPairInstruction *castRegisterPairInstruction(
     const Instruction *instruction) __attribute__((const));
 
-#define TABLE_ITEM(opcode, ...)             \
-  void Execute_##opcode(Emulator *emulator, \
-                        const RegisterPairInstruction *instruction);
+#define TABLE_ITEM(opcode, ...) \
+  void Execute_##opcode(Cpu *cpu, const RegisterPairInstruction *instruction);
 REGISTER_PAIR_OPCODE_DEFS
 #undef TABLE_ITEM
 

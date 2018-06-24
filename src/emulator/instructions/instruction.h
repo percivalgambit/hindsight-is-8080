@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-#include "emulator/emulator.h"
+#include "emulator/cpu/cpu.h"
 #include "emulator/instructions/opcode.h"
 
 #define kMaxInstructionSize 3
@@ -25,15 +25,15 @@ typedef enum {
 
 typedef INSTRUCTION_BASE Instruction;
 
-void initInstruction(Instruction *instruction, const unsigned instruction_size,
-                     const Opcode opcode, const uint8_t *data,
-                     const InstructionType type);
+void _initInstruction(Instruction *instruction, const unsigned instruction_size,
+                      const Opcode opcode, const uint8_t *data,
+                      const InstructionType type);
 void deleteInstruction(const Instruction *instruction);
 
-Instruction *decodeInstruction(Emulator *emulator);
-void executeInstruction(Emulator *emulator, const Instruction *instruction);
+Instruction *decodeInstruction(Cpu *cpu);
+void executeInstruction(Cpu *cpu, const Instruction *instruction);
 
-void Execute_INVALID(Emulator *emulator, const Instruction *instruction)
+void Execute_INVALID(Cpu *cpu, const Instruction *instruction)
     __attribute__((noreturn));
 
 #endif  // EMULATOR_INSTRUCTIONS_INSTRUCTION_H_

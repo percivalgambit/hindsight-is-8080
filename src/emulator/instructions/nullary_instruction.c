@@ -4,26 +4,28 @@
 #include <inttypes.h>
 #include <stdbool.h>
 
-#include "emulator/emulator.h"
+#include "emulator/cpu/cpu.h"
+#include "emulator/cpu/cpu_flag.h"
 #include "emulator/instructions/instruction.h"
 #include "emulator/instructions/opcode.h"
+#include "emulator/instructions/operands.h"
 
 static NullaryInstruction nullary_instruction;
 static bool in_use;
 
-NullaryInstruction *newNullaryInstruction(const Opcode opcode,
-                                          const unsigned instruction_size,
-                                          const uint8_t *data) {
+NullaryInstruction *_newNullaryInstruction(const Opcode opcode,
+                                           const unsigned instruction_size,
+                                           const uint8_t *data) {
   assert(in_use == false);
 
   in_use = true;
-  initInstruction((Instruction *)&nullary_instruction, opcode, instruction_size,
-                  data, InstructionType_NULLARY);
+  _initInstruction((Instruction *)&nullary_instruction, opcode,
+                   instruction_size, data, InstructionType_NULLARY);
   return &nullary_instruction;
 }
 
-void deleteNullaryInstruction(const NullaryInstruction *instruction
-                              __attribute__((unused))) {
+void _deleteNullaryInstruction(NullaryInstruction *instruction
+                               __attribute__((unused))) {
   in_use = false;
 }
 
@@ -33,4 +35,14 @@ const NullaryInstruction *castNullaryInstruction(
   assert(instruction->type == InstructionType_NULLARY);
 
   return (const NullaryInstruction *)instruction;
+}
+
+void Execute_STC(Cpu *cpu, const NullaryInstruction *instruction
+                 __attribute__((unused))) {
+  cpuFlagSet(cpu, true, FlagIndex_CARRY);
+}
+
+void Execute_CMC(Cpu *cpu, const NullaryInstruction *instruction
+                 __attribute__((unused))) {
+  cpuFlagComplement(cpu, FlagIndex_CARRY);
 }

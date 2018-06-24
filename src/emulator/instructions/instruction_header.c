@@ -40,49 +40,49 @@ typedef struct {
 
 static const InstructionHeaderEntry kInstructionHeaderTable[UINT8_MAX + 1] = {
     [0x00] = NULLARY_OP(NOP),
-    [0x01] = REGISTER_PAIR_OP(LXI, B),
-    [0x02] = REGISTER_PAIR_OP(STAX, B),
-    [0x03] = REGISTER_PAIR_OP(INX, B),
+    [0x01] = REGISTER_PAIR_OP(LXI, BC),
+    [0x02] = REGISTER_PAIR_OP(STAX, BC),
+    [0x03] = REGISTER_PAIR_OP(INX, BC),
     [0x04] = ONE_REGISTER_OP(INR, B),
     [0x05] = ONE_REGISTER_OP(DCR, B),
     [0x06] = ONE_REGISTER_OP(MVI, B),
     [0x07] = NULLARY_OP(RLC),
     [0x08] = NULLARY_OP(INVALID),
-    [0x09] = REGISTER_PAIR_OP(DAD, B),
-    [0x0A] = REGISTER_PAIR_OP(LDAX, B),
-    [0x0B] = REGISTER_PAIR_OP(DCX, B),
+    [0x09] = REGISTER_PAIR_OP(DAD, BC),
+    [0x0A] = REGISTER_PAIR_OP(LDAX, BC),
+    [0x0B] = REGISTER_PAIR_OP(DCX, BC),
     [0x0C] = ONE_REGISTER_OP(INR, C),
     [0x0D] = ONE_REGISTER_OP(DCR, C),
     [0x0E] = ONE_REGISTER_OP(MVI, C),
     [0x0F] = NULLARY_OP(RRC),
     [0x10] = NULLARY_OP(INVALID),
-    [0x11] = REGISTER_PAIR_OP(LXI, D),
-    [0x12] = REGISTER_PAIR_OP(STAX, D),
-    [0x13] = REGISTER_PAIR_OP(INX, D),
+    [0x11] = REGISTER_PAIR_OP(LXI, DE),
+    [0x12] = REGISTER_PAIR_OP(STAX, DE),
+    [0x13] = REGISTER_PAIR_OP(INX, DE),
     [0x14] = ONE_REGISTER_OP(INR, D),
     [0x15] = ONE_REGISTER_OP(DCR, D),
     [0x16] = ONE_REGISTER_OP(MVI, D),
     [0x17] = NULLARY_OP(RAL),
     [0x18] = NULLARY_OP(INVALID),
-    [0x19] = REGISTER_PAIR_OP(DAD, D),
-    [0x1A] = REGISTER_PAIR_OP(LDAX, D),
-    [0x1B] = REGISTER_PAIR_OP(DCX, D),
+    [0x19] = REGISTER_PAIR_OP(DAD, DE),
+    [0x1A] = REGISTER_PAIR_OP(LDAX, DE),
+    [0x1B] = REGISTER_PAIR_OP(DCX, DE),
     [0x1C] = ONE_REGISTER_OP(INR, E),
     [0x1D] = ONE_REGISTER_OP(DCR, E),
     [0x1E] = ONE_REGISTER_OP(MVI, E),
     [0x1F] = NULLARY_OP(RAR),
     [0x20] = NULLARY_OP(INVALID),
-    [0x21] = REGISTER_PAIR_OP(LXI, H),
+    [0x21] = REGISTER_PAIR_OP(LXI, HL),
     [0x22] = NULLARY_OP(SHLD),
-    [0x23] = REGISTER_PAIR_OP(INX, H),
+    [0x23] = REGISTER_PAIR_OP(INX, HL),
     [0x24] = ONE_REGISTER_OP(INR, H),
     [0x25] = ONE_REGISTER_OP(DCR, H),
     [0x26] = ONE_REGISTER_OP(MVI, H),
     [0x27] = NULLARY_OP(DAA),
     [0x28] = NULLARY_OP(INVALID),
-    [0x29] = REGISTER_PAIR_OP(DAD, H),
+    [0x29] = REGISTER_PAIR_OP(DAD, HL),
     [0x2A] = NULLARY_OP(LHLD),
-    [0x2B] = REGISTER_PAIR_OP(DCX, H),
+    [0x2B] = REGISTER_PAIR_OP(DCX, HL),
     [0x2C] = ONE_REGISTER_OP(INR, L),
     [0x2D] = ONE_REGISTER_OP(DCR, L),
     [0x2E] = ONE_REGISTER_OP(MVI, L),
@@ -232,11 +232,11 @@ static const InstructionHeaderEntry kInstructionHeaderTable[UINT8_MAX + 1] = {
     [0xBE] = ONE_REGISTER_OP(CMP, MEM),
     [0xBF] = ONE_REGISTER_OP(CMP, ACC),
     [0xC0] = NULLARY_OP(RNZ),
-    [0xC1] = REGISTER_PAIR_OP(POP, B),
+    [0xC1] = REGISTER_PAIR_OP(POP, BC),
     [0xC2] = NULLARY_OP(JNZ),
     [0xC3] = NULLARY_OP(JMP),
     [0xC4] = NULLARY_OP(CNZ),
-    [0xC5] = REGISTER_PAIR_OP(PUSH, B),
+    [0xC5] = REGISTER_PAIR_OP(PUSH, BC),
     [0xC6] = NULLARY_OP(ADI),
     [0xC7] = NULLARY_OP(RST),
     [0xC8] = NULLARY_OP(RZ),
@@ -248,11 +248,11 @@ static const InstructionHeaderEntry kInstructionHeaderTable[UINT8_MAX + 1] = {
     [0xCE] = NULLARY_OP(ACI),
     [0xCF] = NULLARY_OP(RST),
     [0xD0] = NULLARY_OP(RNC),
-    [0xD1] = REGISTER_PAIR_OP(POP, D),
+    [0xD1] = REGISTER_PAIR_OP(POP, DE),
     [0xD2] = NULLARY_OP(JNC),
     [0xD3] = NULLARY_OP(OUT),
     [0xD4] = NULLARY_OP(CNC),
-    [0xD5] = REGISTER_PAIR_OP(PUSH, D),
+    [0xD5] = REGISTER_PAIR_OP(PUSH, DE),
     [0xD6] = NULLARY_OP(SUI),
     [0xD7] = NULLARY_OP(RST),
     [0xD8] = NULLARY_OP(RC),
@@ -264,11 +264,11 @@ static const InstructionHeaderEntry kInstructionHeaderTable[UINT8_MAX + 1] = {
     [0xDE] = NULLARY_OP(SBI),
     [0xDF] = NULLARY_OP(RST),
     [0xE0] = NULLARY_OP(RPO),
-    [0xE1] = REGISTER_PAIR_OP(POP, H),
+    [0xE1] = REGISTER_PAIR_OP(POP, HL),
     [0xE2] = NULLARY_OP(JPO),
     [0xE3] = NULLARY_OP(XTHL),
     [0xE4] = NULLARY_OP(CPO),
-    [0xE5] = REGISTER_PAIR_OP(PUSH, H),
+    [0xE5] = REGISTER_PAIR_OP(PUSH, HL),
     [0xE6] = NULLARY_OP(ANI),
     [0xE7] = NULLARY_OP(RST),
     [0xE8] = NULLARY_OP(RPE),
@@ -297,14 +297,14 @@ static const InstructionHeaderEntry kInstructionHeaderTable[UINT8_MAX + 1] = {
     [0xFF] = NULLARY_OP(RST),
 };
 
-Opcode instructionHeaderOpcode(const uint8_t instruction_header) {
+Opcode _instructionHeaderOpcode(const uint8_t instruction_header) {
   const InstructionHeaderEntry entry =
       kInstructionHeaderTable[instruction_header];
   return entry.opcode;
 }
 
-unsigned instructionHeaderSize(const uint8_t instruction_header) {
-  const Opcode opcode = instructionHeaderOpcode(instruction_header);
+unsigned _instructionHeaderSize(const uint8_t instruction_header) {
+  const Opcode opcode = _instructionHeaderOpcode(instruction_header);
   switch (opcode) {
 #define TABLE_ITEM(opcode, instruction_size) \
   case Opcode_##opcode:                      \
@@ -316,8 +316,8 @@ unsigned instructionHeaderSize(const uint8_t instruction_header) {
   }
 }
 
-InstructionType instructionHeaderType(const uint8_t instruction_header) {
-  const Opcode opcode = instructionHeaderOpcode(instruction_header);
+InstructionType _instructionHeaderType(const uint8_t instruction_header) {
+  const Opcode opcode = _instructionHeaderOpcode(instruction_header);
   switch (opcode) {
 #define TABLE_ITEM(opcode, ...) \
   case Opcode_##opcode:         \
@@ -346,7 +346,7 @@ InstructionType instructionHeaderType(const uint8_t instruction_header) {
   }
 }
 
-OperandEntry instructionHeaderOperands(const uint8_t instruction_header) {
+OperandEntry _instructionHeaderOperands(const uint8_t instruction_header) {
   const InstructionHeaderEntry entry =
       kInstructionHeaderTable[instruction_header];
   return entry.operand_entry;

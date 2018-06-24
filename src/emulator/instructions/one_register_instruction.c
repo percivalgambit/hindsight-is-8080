@@ -11,20 +11,20 @@
 static OneRegisterInstruction one_register_instruction;
 static bool in_use;
 
-OneRegisterInstruction *newOneRegisterInstruction(
+OneRegisterInstruction *_newOneRegisterInstruction(
     const Opcode opcode, const unsigned instruction_size, const uint8_t *data,
     const RegisterIndex reg_index) {
   assert(in_use == false);
 
   in_use = true;
-  initInstruction((Instruction *)&one_register_instruction, opcode,
-                  instruction_size, data, InstructionType_ONE_REGISTER);
+  _initInstruction((Instruction *)&one_register_instruction, opcode,
+                   instruction_size, data, InstructionType_ONE_REGISTER);
   one_register_instruction.reg_index = reg_index;
   return &one_register_instruction;
 }
 
-void deleteOneRegisterInstruction(const OneRegisterInstruction *instruction
-                                  __attribute__((unused))) {
+void _deleteOneRegisterInstruction(OneRegisterInstruction *instruction
+                                   __attribute__((unused))) {
   in_use = false;
 }
 
