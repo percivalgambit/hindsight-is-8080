@@ -1,8 +1,8 @@
-#include "emulator/instructions/operands.h"
+#include "emulator/instructions/instruction_operands.h"
 
 #include "util/logging.h"
 
-bool _operandValidRegisterIndexOperand(const RegisterIndex reg_index) {
+bool _validRegisterIndexOperand(const RegisterIndex reg_index) {
   switch (reg_index) {
     case RegisterIndex_B:
     case RegisterIndex_C:

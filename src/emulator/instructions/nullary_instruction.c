@@ -8,19 +8,19 @@
 #include "emulator/cpu/cpu_flag.h"
 #include "emulator/instructions/instruction.h"
 #include "emulator/instructions/opcode.h"
-#include "emulator/instructions/operands.h"
 
 static NullaryInstruction nullary_instruction;
 static bool in_use;
 
-NullaryInstruction *_newNullaryInstruction(const Opcode opcode,
-                                           const unsigned instruction_size,
-                                           const uint8_t *data) {
+NullaryInstruction *_newNullaryInstruction(
+    const Opcode opcode, const unsigned instruction_size, const uint8_t *data,
+    const FlagIndexBitset flags_affected) {
   assert(in_use == false);
 
   in_use = true;
   _initInstruction((Instruction *)&nullary_instruction, opcode,
-                   instruction_size, data, InstructionType_NULLARY);
+                   instruction_size, data, flags_affected,
+                   InstructionType_NULLARY);
   return &nullary_instruction;
 }
 

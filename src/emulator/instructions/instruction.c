@@ -5,6 +5,7 @@
 #include <string.h>
 
 #include "emulator/cpu/cpu.h"
+#include "emulator/cpu/cpu_flag.h"
 #include "emulator/instructions/instruction_header.h"
 #include "emulator/instructions/nullary_instruction.h"
 #include "emulator/instructions/one_register_instruction.h"
@@ -16,13 +17,16 @@
 
 void _initInstruction(Instruction *instruction, const Opcode opcode,
                       const unsigned instruction_size, const uint8_t *data,
+                      const FlagIndexBitset flags_affected,
                       const InstructionType type) {
   assert(instruction != NULL);
   assert(instruction_size <= kMaxInstructionSize);
   assert(data != NULL);
 
-  *instruction =
-      (Instruction){.opcode = opcode, .size = instruction_size, .type = type};
+  *instruction = (Instruction){.opcode = opcode,
+                               .size = instruction_size,
+                               .flags_affected = flags_affected,
+                               .type = type};
   memcpy(instruction->data, data, instruction_size);
 }
 
@@ -56,6 +60,8 @@ Instruction *decodeInstruction(Cpu *cpu) {
   const Opcode opcode = _instructionHeaderOpcode(instruction_header);
   const OperandEntry operand_entry =
       _instructionHeaderOperands(instruction_header);
+  const FlagIndexBitset flags_affected =
+      _instructionHeaderFlagsAffected(instruction_header);
 
   const unsigned instruction_size = _instructionHeaderSize(instruction_header);
   uint8_t instruction_data[instruction_size];
@@ -70,27 +76,27 @@ Instruction *decodeInstruction(Cpu *cpu) {
     case InstructionType_NULLARY:
       assert(operand_entry.instruction_type == InstructionType_NULLARY);
       assert(operand_entry.num_operands == 0);
-      return (Instruction *)_newNullaryInstruction(opcode, instruction_size,
-                                                   instruction_data);
+      return (Instruction *)_newNullaryInstruction(
+          opcode, instruction_size, instruction_data, flags_affected);
     case InstructionType_ONE_REGISTER:
       assert(operand_entry.instruction_type == InstructionType_ONE_REGISTER);
       assert(operand_entry.num_operands == 1);
       return (Instruction *)_newOneRegisterInstruction(
           instruction_header, instruction_size, instruction_data,
-          operand_entry.operands[0].reg_index);
+          flags_affected, operand_entry.operands[0].reg_index);
     case InstructionType_TWO_REGISTER:
       assert(operand_entry.instruction_type == InstructionType_TWO_REGISTER);
       assert(operand_entry.num_operands == 2);
       return (Instruction *)_newTwoRegisterInstruction(
           instruction_header, instruction_size, instruction_data,
-          operand_entry.operands[0].reg_index,
+          flags_affected, operand_entry.operands[0].reg_index,
           operand_entry.operands[1].reg_index);
     case InstructionType_REGISTER_PAIR:
       assert(operand_entry.instruction_type == InstructionType_REGISTER_PAIR);
       assert(operand_entry.num_operands == 1);
       return (Instruction *)_newRegisterPairInstruction(
           instruction_header, instruction_size, instruction_data,
-          operand_entry.operands[0].reg_pair_index);
+          flags_affected, operand_entry.operands[0].reg_pair_index);
     default:
       ERROR("Unknown instruction header type %u", instruction_type);
   }

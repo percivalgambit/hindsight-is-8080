@@ -4,7 +4,7 @@
 #include <stdint.h>
 #include <stdio.h>
 
-#include "emulator/instructions/operands.h"
+#include "emulator/instructions/instruction_operands.h"
 
 typedef struct Cpu Cpu;
 

@@ -4,10 +4,11 @@
 #include <stdint.h>
 
 #include "emulator/cpu/cpu.h"
+#include "emulator/cpu/cpu_flag.h"
 #include "emulator/instructions/instruction.h"
 #include "emulator/instructions/opcode.h"
 #include "emulator/instructions/opcode_defs.h"
-#include "emulator/instructions/operands.h"
+#include "emulator/instructions/instruction_operands.h"
 
 typedef struct {
   INSTRUCTION_BASE;
@@ -16,6 +17,7 @@ typedef struct {
 
 RegisterPairInstruction *_newRegisterPairInstruction(
     const Opcode opcode, const unsigned instruction_size, const uint8_t *data,
+    const FlagIndexBitset flags_affected,
     const RegisterPairIndex reg_pair_index);
 void _deleteRegisterPairInstruction(RegisterPairInstruction *instruction);
 

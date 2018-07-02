@@ -4,7 +4,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-#include "emulator/instructions/operands.h"
+#include "emulator/instructions/instruction_operands.h"
 #include "util/logging.h"
 
 struct Registers {

@@ -2,7 +2,7 @@
 
 #include "emulator/cpu/registers.h"
 #include "emulator/instructions/instruction.h"
-#include "emulator/instructions/operands.h"
+#include "emulator/instructions/instruction_operands.h"
 #include "emulator/io_device.h"
 #include "util/logging.h"
 

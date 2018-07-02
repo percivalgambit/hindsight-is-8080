@@ -3,16 +3,12 @@
 
 #include <stdint.h>
 
+#include "emulator/cpu/cpu_flag.h"
 #include "emulator/instructions/instruction.h"
+#include "emulator/instructions/instruction_operands.h"
 #include "emulator/instructions/opcode.h"
-#include "emulator/instructions/operands.h"
 
 #define kMaxNumOperands 2
-
-typedef union {
-  RegisterIndex reg_index;
-  RegisterPairIndex reg_pair_index;
-} InstructionOperand;
 
 typedef struct {
   unsigned num_operands;
@@ -26,5 +22,7 @@ unsigned _instructionHeaderSize(const uint8_t instruction_header);
 InstructionType _instructionHeaderType(const uint8_t instruction_header);
 OperandEntry _instructionHeaderOperands(const uint8_t instruction_header)
     __attribute__((const));
+FlagIndexBitset _instructionHeaderFlagsAffected(
+    const uint8_t instruction_header) __attribute__((const));
 
 #endif  // EMULATOR_INSTRUCTIONS_INSTRUCTION_HEADER_H_

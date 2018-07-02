@@ -306,8 +306,8 @@ Opcode _instructionHeaderOpcode(const uint8_t instruction_header) {
 unsigned _instructionHeaderSize(const uint8_t instruction_header) {
   const Opcode opcode = _instructionHeaderOpcode(instruction_header);
   switch (opcode) {
-#define TABLE_ITEM(opcode, instruction_size) \
-  case Opcode_##opcode:                      \
+#define TABLE_ITEM(opcode, instruction_size, ...) \
+  case Opcode_##opcode:                           \
     return instruction_size;
     OPCODE_DEFS
 #undef TABLE_ITEM
@@ -350,4 +350,18 @@ OperandEntry _instructionHeaderOperands(const uint8_t instruction_header) {
   const InstructionHeaderEntry entry =
       kInstructionHeaderTable[instruction_header];
   return entry.operand_entry;
+}
+
+FlagIndexBitset _instructionHeaderFlagsAffected(
+    const uint8_t instruction_header) {
+  const Opcode opcode = _instructionHeaderOpcode(instruction_header);
+  switch (opcode) {
+#define TABLE_ITEM(opcode, _, flags_affected) \
+  case Opcode_##opcode:                       \
+    return flags_affected;
+    OPCODE_DEFS
+#undef TABLE_ITEM
+    default:
+      ERROR("Unknown opcode %u", opcode);
+  }
 }

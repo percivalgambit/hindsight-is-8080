@@ -4,6 +4,7 @@
 #include <stdint.h>
 
 #include "emulator/cpu/cpu.h"
+#include "emulator/cpu/cpu_flag.h"
 #include "emulator/instructions/instruction.h"
 #include "emulator/instructions/opcode.h"
 #include "emulator/instructions/opcode_defs.h"
@@ -12,9 +13,9 @@ typedef struct {
   INSTRUCTION_BASE;
 } NullaryInstruction;
 
-NullaryInstruction *_newNullaryInstruction(const Opcode opcode,
-                                           const unsigned instruction_size,
-                                           const uint8_t *data);
+NullaryInstruction *_newNullaryInstruction(
+    const Opcode opcode, const unsigned instruction_size, const uint8_t *data,
+    const FlagIndexBitset flags_affected);
 void _deleteNullaryInstruction(NullaryInstruction *instruction);
 
 const NullaryInstruction *castNullaryInstruction(const Instruction *instruction)

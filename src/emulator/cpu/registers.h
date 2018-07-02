@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-#include "emulator/instructions/operands.h"
+#include "emulator/instructions/instruction_operands.h"
 
 typedef struct Registers Registers;
 

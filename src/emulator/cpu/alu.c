@@ -3,10 +3,12 @@
 #include <assert.h>
 
 #include "emulator/cpu/cpu.h"
-#include "emulator/instructions/operands.h"
+#include "emulator/cpu/cpu_flag.h"
+#include "emulator/instructions/instruction_operands.h"
 
 void aluAdd(Cpu *cpu, const RegisterIndex dst_index,
-            const RegisterIndex src_index) {
+            const RegisterIndex src_index,
+            const FlagIndexBitset flags_affected __attribute__((unused))) {
   assert(cpu != NULL);
   assert(dst_index != RegisterIndex_FLAGS);
   assert(src_index != RegisterIndex_FLAGS);

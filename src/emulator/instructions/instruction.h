@@ -4,6 +4,7 @@
 #include <stdint.h>
 
 #include "emulator/cpu/cpu.h"
+#include "emulator/cpu/cpu_flag.h"
 #include "emulator/instructions/opcode.h"
 
 #define kMaxInstructionSize 3
@@ -20,6 +21,7 @@ typedef enum {
     Opcode opcode;                     \
     unsigned size;                     \
     uint8_t data[kMaxInstructionSize]; \
+    FlagIndexBitset flags_affected;    \
     InstructionType type;              \
   }
 
@@ -27,6 +29,7 @@ typedef INSTRUCTION_BASE Instruction;
 
 void _initInstruction(Instruction *instruction, const unsigned instruction_size,
                       const Opcode opcode, const uint8_t *data,
+                      const FlagIndexBitset flags_affected,
                       const InstructionType type);
 void deleteInstruction(const Instruction *instruction);
 
