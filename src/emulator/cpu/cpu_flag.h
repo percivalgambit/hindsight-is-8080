@@ -2,6 +2,7 @@
 #define EMULATOR_CPU_CPU_FLAG_H_
 
 #include <stdbool.h>
+#include <stdint.h>
 
 #include "emulator/cpu/cpu.h"
 
@@ -19,7 +20,11 @@ void cpuFlagSet(Cpu *cpu, const bool value, const FlagIndex index);
 bool cpuFlagGet(const Cpu *cpu, const FlagIndex index) __attribute__((const));
 void cpuFlagComplement(Cpu *cpu, const FlagIndex index);
 
-bool cpuFlagBitsetTest(const FlagIndexBitset bitset, const FlagIndex index)
-    __attribute__((const));
+void cpuFlagUpdateResult(Cpu *cpu, const FlagIndexBitset flags_affected,
+                         const uint8_t result);
+uint8_t cpuFlagUpdateAdd(Cpu *cpu, const FlagIndexBitset flags_affected,
+                         const uint8_t operand1, const uint8_t operand2);
+uint8_t cpuFlagUpdateSub(Cpu *cpu, const FlagIndexBitset flags_affected,
+                         const uint8_t operand1, const uint8_t operand2);
 
 #endif  // EMULATOR_CPU_CPU_FLAG_H_

@@ -4,11 +4,16 @@
 #include <stdint.h>
 
 #include "emulator/cpu/cpu_flag.h"
+#include "emulator/cpu/register_index.h"
 #include "emulator/instructions/instruction.h"
-#include "emulator/instructions/instruction_operands.h"
 #include "emulator/instructions/opcode.h"
 
 #define kMaxNumOperands 2
+
+typedef union {
+  RegisterIndex reg_index;
+  RegisterPairIndex reg_pair_index;
+} InstructionOperand;
 
 typedef struct {
   unsigned num_operands;

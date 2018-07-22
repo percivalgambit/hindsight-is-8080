@@ -4,7 +4,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-#include "emulator/instructions/instruction_operands.h"
+#include "emulator/cpu/register_index.h"
 #include "util/logging.h"
 
 struct Registers {
@@ -49,7 +49,7 @@ Registers *_newRegisters(void) {
 
 void _deleteRegisters(Registers *registers) { free(registers); }
 
-uint8_t *_registerGet(Registers *registers, const RegisterIndex reg_index) {
+uint8_t *registerGet(Registers *registers, const RegisterIndex reg_index) {
   assert(registers != NULL);
   assert(reg_index != RegisterIndex_MEM);
 
@@ -76,8 +76,8 @@ uint8_t *_registerGet(Registers *registers, const RegisterIndex reg_index) {
   }
 }
 
-uint16_t *_registerPairGet(Registers *registers,
-                           const RegisterPairIndex reg_pair_index) {
+uint16_t *registerPairGet(Registers *registers,
+                          const RegisterPairIndex reg_pair_index) {
   assert(registers != NULL);
   assert(reg_pair_index != RegisterPairIndex_SP);
 

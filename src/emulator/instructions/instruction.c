@@ -138,5 +138,5 @@ void Execute_INVALID(Cpu *cpu, const Instruction *instruction) {
   assert(cpu != NULL);
 
   ERROR("Invalid instruction %" PRIu8 "encountered at position %" PRIu16,
-        *instruction->data, cpuProgramCounter(cpu));
+        *instruction->data, *cpuProgramCounter(cpu));
 }

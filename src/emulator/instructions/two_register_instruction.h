@@ -5,10 +5,10 @@
 
 #include "emulator/cpu/cpu.h"
 #include "emulator/cpu/cpu_flag.h"
+#include "emulator/cpu/register_index.h"
 #include "emulator/instructions/instruction.h"
 #include "emulator/instructions/opcode.h"
 #include "emulator/instructions/opcode_defs.h"
-#include "emulator/instructions/instruction_operands.h"
 
 typedef struct {
   INSTRUCTION_BASE;

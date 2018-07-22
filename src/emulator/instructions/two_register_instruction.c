@@ -5,9 +5,9 @@
 #include <stdint.h>
 
 #include "emulator/cpu/cpu_flag.h"
+#include "emulator/cpu/register_index.h"
 #include "emulator/instructions/instruction.h"
 #include "emulator/instructions/opcode.h"
-#include "emulator/instructions/instruction_operands.h"
 
 static TwoRegisterInstruction two_register_instruction;
 static bool in_use;
@@ -38,4 +38,15 @@ const TwoRegisterInstruction *castTwoRegisterInstruction(
   assert(instruction->type == InstructionType_TWO_REGISTER);
 
   return (const TwoRegisterInstruction *)instruction;
+}
+
+void Execute_MOV(Cpu *cpu, const TwoRegisterInstruction *instruction) {
+  assert(cpu != NULL);
+  assert(instruction != NULL);
+  assert(validRegisterIndexOperand(instruction->reg_index1));
+  assert(validRegisterIndexOperand(instruction->reg_index2));
+
+  uint8_t *dst = cpuGetByte(cpu, instruction->reg_index1);
+  const uint8_t src = *cpuGetByte(cpu, instruction->reg_index2);
+  *dst = src;
 }

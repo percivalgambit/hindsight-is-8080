@@ -6,8 +6,8 @@
 
 #include "emulator/cpu/cpu.h"
 #include "emulator/cpu/cpu_flag.h"
+#include "emulator/cpu/register_index.h"
 #include "emulator/instructions/instruction.h"
-#include "emulator/instructions/instruction_operands.h"
 #include "emulator/instructions/opcode.h"
 
 static OneRegisterInstruction one_register_instruction;
@@ -37,4 +37,127 @@ const OneRegisterInstruction *castOneRegisterInstruction(
   assert(instruction->type == InstructionType_ONE_REGISTER);
 
   return (const OneRegisterInstruction *)instruction;
+}
+
+void Execute_MVI(Cpu *cpu, const OneRegisterInstruction *instruction) {
+  assert(cpu != NULL);
+  assert(instruction != NULL);
+  assert(validRegisterIndexOperand(instruction->reg_index));
+  assert(instruction->size == 2);
+
+  uint8_t *dst = cpuGetByte(cpu, instruction->reg_index);
+  *dst = instruction->data[1];
+}
+
+void Execute_ADD(Cpu *cpu, const OneRegisterInstruction *instruction) {
+  assert(cpu != NULL);
+  assert(instruction != NULL);
+  assert(validRegisterIndexOperand(instruction->reg_index));
+
+  const uint8_t src = *cpuGetByte(cpu, instruction->reg_index);
+  uint8_t *acc = cpuGetByte(cpu, RegisterIndex_ACC);
+  *acc = cpuFlagUpdateAdd(cpu, instruction->flags_affected, *acc, src);
+}
+
+void Execute_ADC(Cpu *cpu, const OneRegisterInstruction *instruction) {
+  assert(cpu != NULL);
+  assert(instruction != NULL);
+  assert(validRegisterIndexOperand(instruction->reg_index));
+
+  const uint8_t src = *cpuGetByte(cpu, instruction->reg_index);
+  const bool carry = cpuFlagGet(cpu, FlagIndex_CARRY);
+  uint8_t *acc = cpuGetByte(cpu, RegisterIndex_ACC);
+  *acc = cpuFlagUpdateAdd(cpu, instruction->flags_affected, *acc,
+                          carry ? (uint8_t)(src + 1) : src);
+}
+
+void Execute_SUB(Cpu *cpu, const OneRegisterInstruction *instruction) {
+  assert(cpu != NULL);
+  assert(instruction != NULL);
+  assert(validRegisterIndexOperand(instruction->reg_index));
+
+  const uint8_t src = *cpuGetByte(cpu, instruction->reg_index);
+  uint8_t *acc = cpuGetByte(cpu, RegisterIndex_ACC);
+  *acc = cpuFlagUpdateSub(cpu, instruction->flags_affected, *acc, src);
+}
+
+void Execute_SBB(Cpu *cpu, const OneRegisterInstruction *instruction) {
+  assert(cpu != NULL);
+  assert(instruction != NULL);
+  assert(validRegisterIndexOperand(instruction->reg_index));
+
+  const uint8_t src = *cpuGetByte(cpu, instruction->reg_index);
+  const bool carry = cpuFlagGet(cpu, FlagIndex_CARRY);
+  uint8_t *acc = cpuGetByte(cpu, RegisterIndex_ACC);
+  *acc = cpuFlagUpdateSub(cpu, instruction->flags_affected, *acc,
+                          carry ? (uint8_t)(src + 1) : src);
+}
+
+void Execute_INR(Cpu *cpu, const OneRegisterInstruction *instruction) {
+  assert(cpu != NULL);
+  assert(instruction != NULL);
+  assert(validRegisterIndexOperand(instruction->reg_index));
+
+  uint8_t *dst = cpuGetByte(cpu, instruction->reg_index);
+  *dst = cpuFlagUpdateAdd(cpu, instruction->flags_affected, *dst,
+                          1 /* operand2 */);
+}
+
+void Execute_DCR(Cpu *cpu, const OneRegisterInstruction *instruction) {
+  assert(cpu != NULL);
+  assert(instruction != NULL);
+  assert(validRegisterIndexOperand(instruction->reg_index));
+
+  uint8_t *dst = cpuGetByte(cpu, instruction->reg_index);
+  *dst = cpuFlagUpdateSub(cpu, instruction->flags_affected, *dst,
+                          1 /* operand2 */);
+}
+
+void Execute_ANA(Cpu *cpu, const OneRegisterInstruction *instruction) {
+  assert(cpu != NULL);
+  assert(instruction != NULL);
+  assert(validRegisterIndexOperand(instruction->reg_index));
+
+  const uint8_t src = *cpuGetByte(cpu, instruction->reg_index);
+  uint8_t *acc = cpuGetByte(cpu, RegisterIndex_ACC);
+  *acc &= src;
+
+  cpuFlagUpdateResult(cpu, instruction->flags_affected, *acc);
+  cpuFlagSet(cpu, FlagIndex_CARRY, false);
+}
+
+void Execute_XRA(Cpu *cpu, const OneRegisterInstruction *instruction) {
+  assert(cpu != NULL);
+  assert(instruction != NULL);
+  assert(validRegisterIndexOperand(instruction->reg_index));
+
+  const uint8_t src = *cpuGetByte(cpu, instruction->reg_index);
+  uint8_t *acc = cpuGetByte(cpu, RegisterIndex_ACC);
+  *acc ^= src;
+
+  cpuFlagUpdateResult(cpu, instruction->flags_affected, *acc);
+  cpuFlagSet(cpu, FlagIndex_CARRY, false);
+}
+
+void Execute_ORA(Cpu *cpu, const OneRegisterInstruction *instruction) {
+  assert(cpu != NULL);
+  assert(instruction != NULL);
+  assert(validRegisterIndexOperand(instruction->reg_index));
+
+  const uint8_t src = *cpuGetByte(cpu, instruction->reg_index);
+  uint8_t *acc = cpuGetByte(cpu, RegisterIndex_ACC);
+  *acc |= src;
+
+  cpuFlagUpdateResult(cpu, instruction->flags_affected, *acc);
+  cpuFlagSet(cpu, FlagIndex_CARRY, false);
+}
+
+void Execute_CMP(Cpu *cpu, const OneRegisterInstruction *instruction) {
+  assert(cpu != NULL);
+  assert(instruction != NULL);
+  assert(validRegisterIndexOperand(instruction->reg_index));
+
+  const uint8_t src = *cpuGetByte(cpu, instruction->reg_index);
+  const uint8_t acc = *cpuGetByte(cpu, RegisterIndex_ACC);
+  cpuFlagUpdateSub(cpu, instruction->flags_affected, acc, src);
 }
