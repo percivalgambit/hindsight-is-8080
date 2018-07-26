@@ -358,7 +358,7 @@ FlagIndexBitset _instructionHeaderFlagsAffected(
   switch (opcode) {
 #define TABLE_ITEM(opcode, _, flags_affected) \
   case Opcode_##opcode:                       \
-    return flags_affected;
+    return (FlagIndexBitset)flags_affected;
     OPCODE_DEFS
 #undef TABLE_ITEM
     default:

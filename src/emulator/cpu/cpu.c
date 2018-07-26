@@ -26,7 +26,7 @@ Cpu *newCpu(FILE *program) {
   assert(program != NULL);
   assert(!ferror(program));
 
-  Cpu *cpu = calloc(1, sizeof(cpu));
+  Cpu *cpu = calloc(1, sizeof(Cpu));
   cpu->registers = _newRegisters();
 
   fread(cpu->memory, sizeof(cpu->memory), 1, program);

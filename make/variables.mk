@@ -16,27 +16,21 @@ ASSERTS_CPPFLAGS := -DDEBUG
 NOASSERTS_CPPFLAGS := -DNDEBUG
 
 COMMON_WARNINGS_FLAGS := \
-  -Wno-error=suggest-attribute=pure -Wno-error=suggest-attribute=const -Wno-error=suggest-attribute=noreturn -Wno-error=suggest-attribute=format -Wno-error=suggest-attribute=cold -Wno-error=suggest-attribute=malloc \
-  -Wunused -Wunused-const-variable=2 -Wunused-macros \
+  -Wunused -Wunused-macros \
   -Wdouble-promotion -Wfloat-equal \
-  -Wformat=2 -Wformat-overflow=2 -Wformat-truncation=2 -Wformat-signedness \
+  -Wformat=2  \
   -Wnull-dereference \
   -Wuninitialized -Winit-self -Wundef \
   -Wmissing-include-dirs \
-  -Wshift-overflow=2 -Wstrict-overflow=5 \
-  -Wstringop-overflow=4 -Wstringop-truncation -Wwrite-strings \
+  -Wstrict-overflow=5 \
+  -Wwrite-strings \
   -Wswitch-enum \
-  -Wsuggest-attribute=pure -Wsuggest-attribute=const -Wsuggest-attribute=noreturn -Wsuggest-attribute=format -Wsuggest-attribute=cold -Wsuggest-attribute=malloc \
-  -Walloc-zero \
-  -Warray-bounds=2 \
-  -Wcast-align=strict -Wconversion \
-  -Wshadow -Wredundant-decls -Wduplicated-cond -Wduplicated-branches -Wlogical-op \
-  -Wunsafe-loop-optimizations \
+  -Wconversion \
+  -Wshadow -Wredundant-decls \
   -Wmissing-declarations \
-  -Wpacked \
-  -Wtrampolines
+  -Wpacked
+
 WARNINGS_CFLAGS := $(COMMON_WARNINGS_FLAGS) \
-  -Wjump-misses-init \
   -Wbad-function-cast \
   -Wstrict-prototypes -Wmissing-prototypes \
   -Wold-style-definition \
@@ -47,3 +41,24 @@ WARNINGS_CXXFLAGS := $(COMMON_WARNINGS_FLAGS) \
   -Wplacement-new=2 \
   -Wzero-as-null-pointer-constant \
   -Wextra-semi
+
+GCC_COMMON_WARNINGS_FLAGS := \
+  -Wno-error=suggest-attribute=pure -Wno-error=suggest-attribute=const -Wno-error=suggest-attribute=noreturn -Wno-error=suggest-attribute=format -Wno-error=suggest-attribute=cold -Wno-error=suggest-attribute=malloc \
+  -Wsuggest-attribute=pure -Wsuggest-attribute=const -Wsuggest-attribute=noreturn -Wsuggest-attribute=format -Wsuggest-attribute=cold -Wsuggest-attribute=malloc \
+  -Wunused-const-variable=2 \
+  -Wformat-overflow=2 -Wformat-truncation=2 -Wformat-signedness \
+  -Wshift-overflow=2 \
+  -Wstringop-overflow=4 -Wstringop-truncation \
+  -Walloc-zero \
+  -Warray-bounds=2 \
+  -Wcast-align=strict \
+  -Wduplicated-cond -Wduplicated-branches -Wlogical-op \
+  -Wunsafe-loop-optimizations \
+  -Wtrampolines
+GCC_WARNINGS_CFLAGS := -Wjump-misses-init
+ifeq ($(CC),gcc)
+	WARNINGS_CFLAGS += $(GCC_COMMON_WARNINGS_FLAGS) $(GCC_WARNINGS_CFLAGS)
+endif
+ifeq ($(CXX),g++)
+	WARNINGS_CXXFLAGS += $(GCC_COMMON_WARNINGS_FLAGS)
+endif

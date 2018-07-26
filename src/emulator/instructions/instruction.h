@@ -27,8 +27,8 @@ typedef enum {
 
 typedef INSTRUCTION_BASE Instruction;
 
-void _initInstruction(Instruction *instruction, const unsigned instruction_size,
-                      const Opcode opcode, const uint8_t *data,
+void _initInstruction(Instruction *instruction, const Opcode opcode,
+                      const unsigned instruction_size, const uint8_t *data,
                       const FlagIndexBitset flags_affected,
                       const InstructionType type);
 void deleteInstruction(const Instruction *instruction);
